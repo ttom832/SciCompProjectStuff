@@ -1,13 +1,13 @@
 clear
 clc
 
-%% Gauss Seidel
-N=10;
-h=2*pi/(N-1);
-x=linspace(-pi-h,pi,N+1);
+%% Initiallization 
+N=10; % Number of nodes in x or y direction
+h=2*pi/(N-1); % step size
+x=linspace(-pi-h,pi,N+1); 
 y=linspace(pi,-pi,N);
-u_domain=zeros(N,N+1);
-[X,Y]=meshgrid(x,y);
+u_domain=zeros(N,N+1); % domain has additional nodes in x to use later as ghost nodes
+[X,Y]=meshgrid(x,y); % x,y grid for plotting
 
 % Top B.C.'s
 f=x(2:end).*(x(2:end)+pi).^2;
@@ -21,15 +21,21 @@ u_domain(N,2:end)=g;
 r=g(end)+((y+pi)/(2*pi))*(f(end)-g(end));
 u_domain(:,N+1)=r';
 
+clear r g f
 
+%% Gauss Seidel
 u=u_domain;
 gauss_errorval=100;
 gauss_iterations=0;
 while gauss_errorval>1
     gauss_iterations=gauss_iterations+1;
     
-    u_old=u;
-    % Circling
+    u_old=u; % This value is used to calculate error from iteration to iteration
+    
+    % The while loop below solves the values in the domain by starting at
+    % the outermost unknowns near the direchlet boundary conditions and
+    % working towards the center of the domain, utilizing as many solved
+    % values as possible to reduce the necessary number of iterations.
     counter=2;
     while counter<=N/2
         
@@ -50,8 +56,8 @@ while gauss_errorval>1
             u( k , N-counter+2 ) = ((sin(pi*(x(N-counter+2)+pi)/(2*pi))*cos((pi/2)*(2*(y(k)+pi)/(2*pi)+1)))*h^2+...
                 u(k-1,N-counter+2)+u(k+1,N-counter+2)+u(k,N-counter+1)+u(k,N-counter+3))*0.25;
         end
-          
-        counter=counter+1;       
+        
+        counter=counter+1;
     end
     
     % Left Pyramid
@@ -77,7 +83,9 @@ while gauss_errorval>1
         end
     end
     
-    % ghost nodes
+    % ghost nodes; this code duplicates values from the right side of the
+    % Nuemann boundary to the left side, in order to simulate the du/dx=0
+    % condition
     u(:,1)=u(:,3);
     
     % left boundary nodes
@@ -95,7 +103,7 @@ while gauss_errorval>1
     for k=1:N
         for j=1:N+1
             if u(k,j) ~= 0
-            error(k,j)=abs((u(k,j)-u_old(k,j))/u(k,j))*100;
+                error(k,j)=abs((u(k,j)-u_old(k,j))/u(k,j))*100;
             end
         end
     end
@@ -106,7 +114,7 @@ gauss_iterations
 gauss_errorval
 figure(1)
 mesh(X,Y,u),xlabel('x'),ylabel('y'),zlabel('u'),title('Gauss Seidel Method')
-
+clear error
 
 %% Gauss-Seidel with Relaxation
 
@@ -117,7 +125,7 @@ iterations_relaxed=0;
 lambda=1.4;
 while errorval_relaxed>1
     iterations_relaxed=iterations_relaxed+1;
-    u_old2=u_relaxed;
+    u_old2=u_relaxed; % This value is used to calculate error from iteration to iteration
     % Circling
     counter=2;
     while counter<=N/2
@@ -198,17 +206,19 @@ iterations_relaxed
 errorval_relaxed
 figure(2)
 mesh(X,Y,u_relaxed),xlabel('x'),ylabel('y'),zlabel('u'),title('Gauss Seidel with Relaxation')
-
+clear error_relaxed
 %% Gauss Siedel No Forcing Function
-uNoF=u_domain
 
+% Boundary Conditions
+uNoF=u_domain;
 
 errorval_no_force=100;
 iterations_no_force=0;
 while errorval_no_force>1
     iterations_no_force=iterations_no_force+1;
-    u_oldNoF=uNoF;
-    % Circling
+    u_oldNoF=uNoF; % This value is used to calculate error from iteration to iteration
+    
+    
     counter=2;
     while counter<=N/2
         
@@ -254,7 +264,7 @@ while errorval_no_force>1
         end
     end
     
-    % ghost nodes
+    % ghost nodes  
     uNoF(:,1)=uNoF(:,3);
     
     % left boundary nodes
@@ -279,3 +289,5 @@ iterations_no_force
 errorval_no_force
 figure(3)
 mesh(X,Y,uNoF),xlabel('x'),ylabel('y'),zlabel('u'),title('Gauss Seidel with no Forcing Function')
+
+clear u_old u_old2 u_oldNoF u_domain counter counter2 j k error_no_force x y
