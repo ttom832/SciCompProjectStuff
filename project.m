@@ -1,14 +1,15 @@
-clear
-clc
+
+function[h,cycles,percent_error,u_gauss_seidel,u_gauss_seidel_relaxed,u_gauss_seidel_no_force,u_gauss_seidel_no_force_relaxed]=project(Nodes,Lambda)
+
 
 %% Initiallization
-N=10; % Number of nodes in x or y direction
+N=Nodes; % Number of nodes in x or y direction
 h=2*pi/(N-1); % step size
-x=linspace(-pi-h,pi,N+1);
-y=linspace(pi,-pi,N);
+x=linspace(-pi-h,pi,N+1); % x axis domain
+y=linspace(pi,-pi,N); % y axis domain
 u_domain=zeros(N,N+1); % domain has additional nodes in x to use later as ghost nodes
 [X,Y]=meshgrid(x,y); % x,y grid for plotting
-addon=0.4;
+addon=Lambda-0.4;
 cycles=[];
 percent_error=[];
 position=1; % reveals which loop is running
@@ -47,7 +48,7 @@ while finished<=1
     % to provoke a second solution using the relaxation method.
     while lambda<=1+addon
         
-
+        
         % The while loop below continually improves the solution by using
         % the newly solved values of the domain to solve the domain again,
         % until the error between iterations is less than 1 percent
@@ -139,7 +140,7 @@ while finished<=1
             errorval=mean(mean(error));
             u=lambda*u+(1-lambda)*u_old;
         end
-        if position==1  % Stores solutions for later use 
+        if position==1  % Stores solutions for later use
             u_gauss_seidel=u;
         elseif position==2
             u_gauss_seidel_relaxed=u;
@@ -163,6 +164,9 @@ figure(1)
 mesh(X,Y,u),xlabel('x'),ylabel('y'),zlabel('u'),title('Gauss Seidel Method')
 clear error
 
+N
+h
+lambda+addon
 disp('Gauss Seidel , Gauss Seidel with Relaxation , Gauss Seidel no Forcing Function , Gauss Seidel with Relaxation no Forcing Function')
 cycles
 percent_error
@@ -170,4 +174,5 @@ percent_error
 
 
 
-clear u_old u_domain counter counter2 j k x y
+clear u_old u_domain counter counter2 j k x y iterations addon Force N errorVal finished
+end
