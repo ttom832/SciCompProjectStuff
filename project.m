@@ -1,5 +1,5 @@
 
-function[h,cycles,percent_error,u_gauss_seidel,u_gauss_seidel_relaxed,u_gauss_seidel_no_force,u_gauss_seidel_no_force_relaxed]=project(Nodes,Lambda)
+function[h,X,Y,cycles,percent_error,u_gauss_seidel,u_gauss_seidel_relaxed,u_gauss_seidel_no_force,u_gauss_seidel_no_force_relaxed]=project(Nodes,Lambda)
 
 
 %% Initiallization
@@ -9,7 +9,7 @@ x=linspace(-pi-h,pi,N+1); % x axis domain
 y=linspace(pi,-pi,N); % y axis domain
 u_domain=zeros(N,N+1); % domain has additional nodes in x to use later as ghost nodes
 [X,Y]=meshgrid(x,y); % x,y grid for plotting
-addon=Lambda-0.4;
+addon=Lambda-1;
 cycles=[];
 percent_error=[];
 position=1; % reveals which loop is running
@@ -160,19 +160,7 @@ while finished<=1
     Force=Force*0;
     finished=finished+1;
 end
-figure(1)
-mesh(X,Y,u),xlabel('x'),ylabel('y'),zlabel('u'),title('Gauss Seidel Method')
-clear error
-
-N
-h
-lambda+addon
-disp('Gauss Seidel , Gauss Seidel with Relaxation , Gauss Seidel no Forcing Function , Gauss Seidel with Relaxation no Forcing Function')
-cycles
-percent_error
 
 
-
-
-clear u_old u_domain counter counter2 j k x y iterations addon Force N errorVal finished
+clear error u_old u_domain counter counter2 j k x y iterations addon Force N errorVal finished
 end
