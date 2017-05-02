@@ -1,8 +1,10 @@
 clear
 clc
-
-Nodes=[10,20,50];
-Lambda=1.4;
+Lambda=1.4; % verified with experimentation to be best value
+y=[1,2,5,6,10,15,25]; % geometric multiplier which increases number of nodes in domain
+Nodes=y*10; % Nodes along edge of sqaure domain
+analysisNode1=2;
+analysisNode2=9;
 
 for p=1:length(Nodes)
 [h,...
@@ -19,13 +21,34 @@ for p=1:length(Nodes)
 Cycles(p,:)=cycles;
 Error(p,:)=percent_error;
 H(p,1)=h;
+
+% (-1.745 , 1.745) position
+upper_left_position(p)=u_gauss_seidel(analysisNode1*y(p),analysisNode1*y(p)+1);
+% (-1.745 , 1.745) position
+upper_right_position(p)=u_gauss_seidel(analysisNode1*y(p),analysisNode2*y(p)+1);
+% (-1.745 , 1.745) position
+lower_left_position(p)=u_gauss_seidel(analysisNode2*y(p),analysisNode1*y(p)+1);
+% (-1.745 , 1.745) position
+lower_right_position(p)=u_gauss_seidel(analysisNode2*y(p),analysisNode2*y(p)+1);
 end
 
+upper_left_position
+upper_right_position
+lower_left_position
+lower_right_position
 disp('Step Size')
 disp(H)
 disp('Gauss Seidel , Gauss Seidel with Relaxation , Gauss Seidel no Forcing Function , Gauss Seidel with Relaxation no Forcing Function')
 Cycles
 Error
+for k=1:length(Nodes)
+percent_improvement(k,1:2)=[(Cycles(k,1)-Cycles(k,2))/(Cycles(k,1))*100,(Cycles(k,3)-Cycles(k,4))/(Cycles(k,3))*100];
+end
+percent_improvement
+
+
+plot(Nodes,upper_right_position,Nodes,upper_left_position,Nodes,lower_left_position,Nodes,lower_right_position),legend('Position A','Position B','Position C','Position D'),grid,title('Grid Convergence'),xlabel('Nodes along Edge'),ylabel('Value at Position')
+
 % figure(1)
 % mesh(X,Y,u_gauss_seidel),xlabel('x'),ylabel('y'),zlabel('u'),title('Gauss Seidel')
 % 
@@ -40,7 +63,8 @@ Error
 % 
 % figure(5)
 % mesh(X,Y,u_gauss_seidel_relaxed-u_gauss_seidel),xlabel('x'),ylabel('y'),zlabel('u'),title('Difference in Gauss Seidel and Gauss Seidel Relaxed')
-% 
+
+
 
 
 
