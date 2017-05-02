@@ -6,25 +6,28 @@ N=10;
 h=2*pi/(N-1);
 x=linspace(-pi-h,pi,N+1);
 y=linspace(pi,-pi,N);
-u=zeros(N,N+1);
+u_domain=zeros(N,N+1);
 [X,Y]=meshgrid(x,y);
 
 % Top B.C.'s
 f=x(2:end).*(x(2:end)+pi).^2;
-u(1,2:end)=f;
+u_domain(1,2:end)=f;
 
 % Bottom B.C.'s
 g=(x(2:end)+pi).^2.*cos(-x(2:end));
-u(N,2:end)=g;
+u_domain(N,2:end)=g;
 
 % Right B.C.'s
-h=g(end)+((y+pi)/(2*pi))*(f(end)-g(end))
-u(:,N+1)=h';
+r=g(end)+((y+pi)/(2*pi))*(f(end)-g(end));
+u_domain(:,N+1)=r';
 
-errorval=100;
-iterations=0;
-while errorval>1
-    iterations=iterations+1;
+
+u=u_domain;
+gauss_errorval=100;
+gauss_iterations=0;
+while gauss_errorval>1
+    gauss_iterations=gauss_iterations+1;
+    
     u_old=u;
     % Circling
     counter=2;
@@ -97,63 +100,45 @@ while errorval>1
         end
     end
     % average error over domain
-    errorval=mean(mean(error));
+    gauss_errorval=mean(mean(error));
 end
-iterations
-errorval
+gauss_iterations
+gauss_errorval
 figure(1)
 mesh(X,Y,u),xlabel('x'),ylabel('y'),zlabel('u'),title('Gauss Seidel Method')
-
-u_rel=zeros(N,N+1);
 
 
 %% Gauss-Seidel with Relaxation
 
-% Top B.C.'s
-for k=2:N+1
-    u_rel(1,k)=x(k)*(x(k)+pi)^2;
-end
+u_relaxed=u_domain;
 
-% Bottom B.C.'s
-for k=2:N+1
-    u_rel(N,k)=(x(k)+pi)^2*cos(pi*x(k)/-pi);
-end
-
-% Right B.C.'s
-for k=1:N
-    u_rel(k,N+1)=((pi+pi)^2*cos(pi*pi/-pi))+...
-        ((y(k)+pi)/(pi+pi))*...
-        (pi*(pi+pi)^2-...
-        ((pi+pi)^2*cos(pi*pi/-pi)));
-end
-
-errorval2=100;
-iterations2=0;
+errorval_relaxed=100;
+iterations_relaxed=0;
 lambda=1.4;
-while errorval2>1
-    iterations2=iterations2+1;
-    u_old2=u_rel;
+while errorval_relaxed>1
+    iterations_relaxed=iterations_relaxed+1;
+    u_old2=u_relaxed;
     % Circling
     counter=2;
     while counter<=N/2
         
         % Top Pyramid
         for j=      N-counter+2   :  -1 :   counter+1
-            u_rel( counter , j ) = ((sin(pi*(x(j)+pi)/(2*pi))*cos((pi/2)*(2*(y(counter)+pi)/(2*pi)+1)))*h^2+...
-                u_rel(counter-1,j)+u_rel(counter+1,j)+u_rel(counter,j-1)+u_rel(counter,j+1))*0.25;
+            u_relaxed( counter , j ) = ((sin(pi*(x(j)+pi)/(2*pi))*cos((pi/2)*(2*(y(counter)+pi)/(2*pi)+1)))*h^2+...
+                u_relaxed(counter-1,j)+u_relaxed(counter+1,j)+u_relaxed(counter,j-1)+u_relaxed(counter,j+1))*0.25;
         end
         
         
         % Bottom Pyramid
         for j=      N-counter+2  :  -1 :    counter+1
-            u_rel( N-counter+1 , j ) = ((sin(pi*(x(j)+pi)/(2*pi))*cos((pi/2)*(2*(y(N-counter+1)+pi)/(2*pi)+1)))*h^2+...
-                u_rel(N-counter+2,j)+u_rel(N-counter,j)+u_rel(N-counter+1,j-1)+u_rel(N-counter+1,j+1))*0.25;
+            u_relaxed( N-counter+1 , j ) = ((sin(pi*(x(j)+pi)/(2*pi))*cos((pi/2)*(2*(y(N-counter+1)+pi)/(2*pi)+1)))*h^2+...
+                u_relaxed(N-counter+2,j)+u_relaxed(N-counter,j)+u_relaxed(N-counter+1,j-1)+u_relaxed(N-counter+1,j+1))*0.25;
         end
         
         % Right Pyramid
         for k=       counter+1      :        N-counter
-            u_rel( k , N-counter+2 ) = ((sin(pi*(x(N-counter+2)+pi)/(2*pi))*cos((pi/2)*(2*(y(k)+pi)/(2*pi)+1)))*h^2+...
-                u_rel(k-1,N-counter+2)+u_rel(k+1,N-counter+2)+u_rel(k,N-counter+1)+u_rel(k,N-counter+3))*0.25;
+            u_relaxed( k , N-counter+2 ) = ((sin(pi*(x(N-counter+2)+pi)/(2*pi))*cos((pi/2)*(2*(y(k)+pi)/(2*pi)+1)))*h^2+...
+                u_relaxed(k-1,N-counter+2)+u_relaxed(k+1,N-counter+2)+u_relaxed(k,N-counter+1)+u_relaxed(k,N-counter+3))*0.25;
         end
         
         
@@ -167,8 +152,8 @@ while errorval2>1
         for j=       floor(N/2)+1 :   -1 :  3
             counter2=counter2+1;
             for k =  floor(N/2)-counter2+2    :    floor(N/2)+counter2-1
-                u_rel( k , j) = ((sin(pi*(x(j)+pi)/(2*pi))*cos((pi/2)*(2*(y(k)+pi)/(2*pi)+1)))*h^2+...
-                    u_rel(k-1,j)+u_rel(k+1,j)+u_rel(k,j-1)+u_rel(k,j+1))*0.25;
+                u_relaxed( k , j) = ((sin(pi*(x(j)+pi)/(2*pi))*cos((pi/2)*(2*(y(k)+pi)/(2*pi)+1)))*h^2+...
+                    u_relaxed(k-1,j)+u_relaxed(k+1,j)+u_relaxed(k,j-1)+u_relaxed(k,j+1))*0.25;
             end
             
         end
@@ -177,67 +162,51 @@ while errorval2>1
         for j=       floor(N/2)+2 :   -1 :  3
             counter2=counter2+1;
             for k =  floor(N/2)-counter2+2   :    floor(N/2)+counter2
-                u_rel( k , j) = ((sin(pi*(x(j)+pi)/(2*pi))*cos((pi/2)*(2*(y(k)+pi)/(2*pi)+1)))*h^2+...
-                    u_rel(k-1,j)+u_rel(k+1,j)+u_rel(k,j-1)+u_rel(k,j+1))*0.25;
+                u_relaxed( k , j) = ((sin(pi*(x(j)+pi)/(2*pi))*cos((pi/2)*(2*(y(k)+pi)/(2*pi)+1)))*h^2+...
+                    u_relaxed(k-1,j)+u_relaxed(k+1,j)+u_relaxed(k,j-1)+u_relaxed(k,j+1))*0.25;
             end
             
         end
     end
     
     % ghost nodes
-    u_rel(:,1)=u_rel(:,3);
+    u_relaxed(:,1)=u_relaxed(:,3);
     
     % left boundary nodes
     for k=2:N-1
-        u_rel(k,2)=((sin(pi*(x(2)+pi)/(2*pi))*cos((pi/2)*(2*(y(k)+pi)/(2*pi)+1)))*h^2+...
-            u_rel(k-1,2)+u_rel(k+1,2)+u_rel(k,1)+u_rel(k,3))*0.25;
+        u_relaxed(k,2)=((sin(pi*(x(2)+pi)/(2*pi))*cos((pi/2)*(2*(y(k)+pi)/(2*pi)+1)))*h^2+...
+            u_relaxed(k-1,2)+u_relaxed(k+1,2)+u_relaxed(k,1)+u_relaxed(k,3))*0.25;
     end
     
     % remaining 2 nodes at nueman boundary
-    u_rel(1,2)=((sin(pi*(x(2)+pi)/(2*pi))*cos((pi/2)*(2*(y(1)+pi)/(2*pi)+1)))*h^2+...
-        u_rel(2,2)+u_rel(1,1)+u_rel(1,3))*0.25;
-    u_rel(N,2)=((sin(pi*(x(2)+pi)/(2*pi))*cos((pi/2)*(2*(y(N)+pi)/(2*pi)+1)))*h^2+...
-        u_rel(N-1,2)+u_rel(N,1)+u_rel(N,3))*0.25;
+    u_relaxed(1,2)=((sin(pi*(x(2)+pi)/(2*pi))*cos((pi/2)*(2*(y(1)+pi)/(2*pi)+1)))*h^2+...
+        u_relaxed(2,2)+u_relaxed(1,1)+u_relaxed(1,3))*0.25;
+    u_relaxed(N,2)=((sin(pi*(x(2)+pi)/(2*pi))*cos((pi/2)*(2*(y(N)+pi)/(2*pi)+1)))*h^2+...
+        u_relaxed(N-1,2)+u_relaxed(N,1)+u_relaxed(N,3))*0.25;
     
     
     for k=1:N
         for j=1:N+1
-            error2(k,j)=abs((u_rel(k,j)-u_old2(k,j))/u_rel(k,j))*100;
+            error2(k,j)=abs((u_relaxed(k,j)-u_old2(k,j))/u_relaxed(k,j))*100;
         end
     end
     % average error over domain
-    errorval2=mean(mean(error2));
-    u_rel=lambda*u_rel+(1-lambda)*u_old2;
+    errorval_relaxed=mean(mean(error2));
+    u_relaxed=lambda*u_relaxed+(1-lambda)*u_old2;
 end
-iterations2
-errorval2
+iterations_relaxed
+errorval_relaxed
 figure(2)
-mesh(X,Y,u_rel),xlabel('x'),ylabel('y'),zlabel('u'),title('Gauss Seidel with Relaxation')
+mesh(X,Y,u_relaxed),xlabel('x'),ylabel('y'),zlabel('u'),title('Gauss Seidel with Relaxation')
 
 %% Gauss Siedel No Forcing Function
-uNoF=zeros(N,N+1);
-% Top B.C.'s
-for k=2:N+1
-    uNoF(1,k)=x(k)*(x(k)+pi)^2;
-end
+uNoF=u_domain
 
-% Bottom B.C.'s
-for k=2:N+1
-    uNoF(N,k)=(x(k)+pi)^2*cos(pi*x(k)/-pi);
-end
 
-% Right B.C.'s
-for k=1:N
-    uNoF(k,N+1)=((pi+pi)^2*cos(pi*pi/-pi))+...
-        ((y(k)+pi)/(pi+pi))*...
-        (pi*(pi+pi)^2-...
-        ((pi+pi)^2*cos(pi*pi/-pi)));
-end
-
-errorval3=100;
-iterations3=0;
-while errorval3>1
-    iterations3=iterations3+1;
+errorval_no_force=100;
+iterations_no_force=0;
+while errorval_no_force>1
+    iterations_no_force=iterations_no_force+1;
     u_oldNoF=uNoF;
     % Circling
     counter=2;
@@ -304,9 +273,9 @@ while errorval3>1
         end
     end
     % average error over domain
-    errorval3=mean(mean(error3));
+    errorval_no_force=mean(mean(error3));
 end
-iterations3
-errorval3
+iterations_no_force
+errorval_no_force
 figure(3)
 mesh(X,Y,uNoF),xlabel('x'),ylabel('y'),zlabel('u'),title('Gauss Seidel with no Forcing Function')
