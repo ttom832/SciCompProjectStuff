@@ -28,6 +28,7 @@ u_domain(:,N+1)=r';
 clear r g f
 
 %% Forcing Function
+Force=zeros(N,N+1);
 for k=1:length(y)
     for j=1:length(x)
         Force(k,j)=(sin(pi*(x(j)+pi)/(2*pi))*cos((pi/2)*(2*(y(k)+pi)/(2*pi)+1)));
@@ -36,24 +37,28 @@ end
 
 %% Gauss Seidel Method
 finished=0; % tells the while loop when to stop
+
+% The while loop below 
 while finished<=1
     lambda=1;
     
-    
+    % The while loop below switches the value of lambda from 1 to 1+"addon"
+    % to provoke a second solution using the relaxation method.
     while lambda<=1+addon
+        
+
+        % The while loop below continually improves the solution by using
+        % the newly solved values of the domain to solve the domain again,
+        % until the error between iterations is less than 1 percent
         
         u=u_domain; % Sets or resets the domain boundary conditions and zeros out all others
         errorval=100; %  arbitrary initial error value
         iterations=0; % number of iterations for each solution, later stored as an element in the array "cycles"
 
-        % The while loop below continually improves the solution by using
-        % the newly solved values of the domain to solve the domain again,
-        % until the error between iterations is less than 1 percent
-         
         while errorval>1
             iterations=iterations+1;
             
-            u_old=u; % This value is used to calculate error from iteration to iteration
+            u_old=u; % This value is used to calculate error from iteration to iteration, and is also used in the relaxation equation
             
             % The while loop below solves the values in the domain by starting at
             % the outermost unknowns near the direchlet boundary conditions and
@@ -132,6 +137,7 @@ while finished<=1
             end
             % average error over domain
             errorval=mean(mean(error));
+            u=lambda*u+(1-lambda)*u_old;
         end
         cycles(end+1)=iterations;
         percent_error(end+1)=errorval;
@@ -146,14 +152,11 @@ figure(1)
 mesh(X,Y,u),xlabel('x'),ylabel('y'),zlabel('u'),title('Gauss Seidel Method')
 clear error
 
+disp('Gauss Seidel , Gauss Seidel with Relaxation , Gauss Seidel no Forcing Function , Gauss Seidel with Relaxation no Forcing Function')
+cycles
+percent_error
 
-iterations_relaxed
-errorval_relaxed
-figure(2)
-mesh(X,Y,u_relaxed),xlabel('x'),ylabel('y'),zlabel('u'),title('Gauss Seidel with Relaxation')
-clear error
 
-figure(3)
-mesh(X,Y,uNoF),xlabel('x'),ylabel('y'),zlabel('u'),title('Gauss Seidel with no Forcing Function')
 
-clear u_old u_old2 u_oldNoF u_domain counter counter2 j k error_no_force x y
+
+clear u_old u_domain counter counter2 j k x y

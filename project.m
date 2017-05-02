@@ -11,6 +11,7 @@ u_domain=zeros(N,N+1); % domain has additional nodes in x to use later as ghost 
 addon=0.4;
 cycles=[];
 percent_error=[];
+position=1; % reveals which loop is running
 
 %% Domain Boundary Conditions
 % Top B.C.'s
@@ -35,8 +36,10 @@ for k=1:length(y)
     end
 end
 
-%% Gauss Seidel Method
+%% Gauss Seidel and Gauss Seidel with Relaxation Methods
 finished=0; % tells the while loop when to stop
+
+% The while loop below provokes the next loops to run with zero forcing function
 while finished<=1
     lambda=1;
     
@@ -52,7 +55,6 @@ while finished<=1
         u=u_domain; % Sets or resets the domain boundary conditions and zeros out all others
         errorval=100; %  arbitrary initial error value
         iterations=0; % number of iterations for each solution, later stored as an element in the array "cycles"
-
         while errorval>1
             iterations=iterations+1;
             
@@ -137,10 +139,21 @@ while finished<=1
             errorval=mean(mean(error));
             u=lambda*u+(1-lambda)*u_old;
         end
+        if position==1  % Stores solutions for later use 
+            u_gauss_seidel=u;
+        elseif position==2
+            u_gauss_seidel_relaxed=u;
+        elseif position==3
+            u_gauss_seidel_no_force=u;
+        elseif position==4
+            u_gauss_seidel_no_force_relaxed=u;
+        else
+            disp(error)
+        end
         cycles(end+1)=iterations;
         percent_error(end+1)=errorval;
-        
         lambda=lambda+addon;
+        position=position+1;
     end
     lambda=1;
     Force=Force*0;
@@ -157,4 +170,4 @@ percent_error
 
 
 
-clear u_old u_old2 u_oldNoF u_domain counter counter2 j k error_no_force x y
+clear u_old u_domain counter counter2 j k x y
