@@ -1,7 +1,7 @@
 clear
 clc
 
-%% Gauss Seidel
+%% Initiallization 
 N=10; % Number of nodes in x or y direction
 h=2*pi/(N-1); % step size
 x=linspace(-pi-h,pi,N+1); 
@@ -9,6 +9,7 @@ y=linspace(pi,-pi,N);
 u_domain=zeros(N,N+1); % domain has additional nodes in x to use later as ghost nodes
 [X,Y]=meshgrid(x,y); % x,y grid for plotting
 
+%% Domain Boundary Conditions
 % Top B.C.'s
 f=x(2:end).*(x(2:end)+pi).^2;
 u_domain(1,2:end)=f;
@@ -23,6 +24,14 @@ u_domain(:,N+1)=r';
 
 clear r g f
 
+%% Forcing Function 
+for k=1:length(y)
+    for j=1:length(x)
+        Force(k,j)=(sin(pi*(x(j)+pi)/(2*pi))*cos((pi/2)*(2*(y(k)+pi)/(2*pi)+1)))
+    end
+end
+
+%% Gauss Seidel
 u=u_domain;
 gauss_errorval=100;
 gauss_iterations=0;
@@ -194,18 +203,18 @@ while errorval_relaxed>1
     
     for k=1:N
         for j=1:N+1
-            error2(k,j)=abs((u_relaxed(k,j)-u_old2(k,j))/u_relaxed(k,j))*100;
+            error(k,j)=abs((u_relaxed(k,j)-u_old2(k,j))/u_relaxed(k,j))*100;
         end
     end
     % average error over domain
-    errorval_relaxed=mean(mean(error2));
+    errorval_relaxed=mean(mean(error));
     u_relaxed=lambda*u_relaxed+(1-lambda)*u_old2;
 end
 iterations_relaxed
 errorval_relaxed
 figure(2)
 mesh(X,Y,u_relaxed),xlabel('x'),ylabel('y'),zlabel('u'),title('Gauss Seidel with Relaxation')
-clear error_relaxed
+clear error
 %% Gauss Siedel No Forcing Function
 
 % Boundary Conditions

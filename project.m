@@ -9,6 +9,7 @@ y=linspace(pi,-pi,N);
 u_domain=zeros(N,N+1); % domain has additional nodes in x to use later as ghost nodes
 [X,Y]=meshgrid(x,y); % x,y grid for plotting
 
+%% Domain Boundary Conditions
 % Top B.C.'s
 f=x(2:end).*(x(2:end)+pi).^2;
 u_domain(1,2:end)=f;
@@ -22,6 +23,13 @@ r=g(end)+((y+pi)/(2*pi))*(f(end)-g(end));
 u_domain(:,N+1)=r';
 
 clear r g f
+
+%% Forcing Function 
+for k=1:length(y)
+    for j=1:length(x)
+        Force(k,j)=(sin(pi*(x(j)+pi)/(2*pi))*cos((pi/2)*(2*(y(k)+pi)/(2*pi)+1)));
+    end
+end
 
 %% Gauss Seidel
 u=u_domain;
@@ -41,19 +49,19 @@ while gauss_errorval>1
         
         % Top Pyramid
         for j=      N-counter+2   :  -1 :   counter+1
-            u( counter , j ) = ((sin(pi*(x(j)+pi)/(2*pi))*cos((pi/2)*(2*(y(counter)+pi)/(2*pi)+1)))*h^2+...
+            u( counter , j ) = (Force(counter,j)*h^2+...
                 u(counter-1,j)+u(counter+1,j)+u(counter,j-1)+u(counter,j+1))*0.25;
         end
         
         % Bottom Pyramid
         for j=      N-counter+2  :  -1 :    counter+1
-            u( N-counter+1 , j ) = ((sin(pi*(x(j)+pi)/(2*pi))*cos((pi/2)*(2*(y(N-counter+1)+pi)/(2*pi)+1)))*h^2+...
+            u( N-counter+1 , j ) = (Force(N-counter+1,j) *h^2+...
                 u(N-counter+2,j)+u(N-counter,j)+u(N-counter+1,j-1)+u(N-counter+1,j+1))*0.25;
         end
         
         % Right Pyramid
         for k=       counter+1      :        N-counter
-            u( k , N-counter+2 ) = ((sin(pi*(x(N-counter+2)+pi)/(2*pi))*cos((pi/2)*(2*(y(k)+pi)/(2*pi)+1)))*h^2+...
+            u( k , N-counter+2 ) = (Force(k,N-counter+2)*h^2+...
                 u(k-1,N-counter+2)+u(k+1,N-counter+2)+u(k,N-counter+1)+u(k,N-counter+3))*0.25;
         end
         
@@ -66,7 +74,7 @@ while gauss_errorval>1
         for j=       floor(N/2)+1 :   -1 :  3
             counter2=counter2+1;
             for k =  floor(N/2)-counter2+2    :    floor(N/2)+counter2-1
-                u( k , j) = ((sin(pi*(x(j)+pi)/(2*pi))*cos((pi/2)*(2*(y(k)+pi)/(2*pi)+1)))*h^2+...
+                u( k , j) = (Force(k,j)*h^2+...
                     u(k-1,j)+u(k+1,j)+u(k,j-1)+u(k,j+1))*0.25;
             end
             
@@ -76,7 +84,7 @@ while gauss_errorval>1
         for j=       floor(N/2)+2 :   -1 :  3
             counter2=counter2+1;
             for k =  floor(N/2)-counter2+2   :    floor(N/2)+counter2
-                u( k , j) = ((sin(pi*(x(j)+pi)/(2*pi))*cos((pi/2)*(2*(y(k)+pi)/(2*pi)+1)))*h^2+...
+                u( k , j) = (Force(k,j)*h^2+...
                     u(k-1,j)+u(k+1,j)+u(k,j-1)+u(k,j+1))*0.25;
             end
             
@@ -90,14 +98,14 @@ while gauss_errorval>1
     
     % left boundary nodes
     for k=2:N-1
-        u(k,2)=((sin(pi*(x(2)+pi)/(2*pi))*cos((pi/2)*(2*(y(k)+pi)/(2*pi)+1)))*h^2+...
+        u(k,2)=(Force(k,2)*h^2+...
             u(k-1,2)+u(k+1,2)+u(k,1)+u(k,3))*0.25;
     end
     
     % remaining 2 nodes at nueman boundary
-    u(1,2)=((sin(pi*(x(2)+pi)/(2*pi))*cos((pi/2)*(2*(y(1)+pi)/(2*pi)+1)))*h^2+...
+    u(1,2)=(Force(1,2)*h^2+...
         u(2,2)+u(1,1)+u(1,3))*0.25;
-    u(N,2)=((sin(pi*(x(2)+pi)/(2*pi))*cos((pi/2)*(2*(y(N)+pi)/(2*pi)+1)))*h^2+...
+    u(N,2)=(Force(N,2)*h^2+...
         u(N-1,2)+u(N,1)+u(N,3))*0.25;
     
     for k=1:N
@@ -195,18 +203,18 @@ while errorval_relaxed>1
     
     for k=1:N
         for j=1:N+1
-            error2(k,j)=abs((u_relaxed(k,j)-u_old2(k,j))/u_relaxed(k,j))*100;
+            error(k,j)=abs((u_relaxed(k,j)-u_old2(k,j))/u_relaxed(k,j))*100;
         end
     end
     % average error over domain
-    errorval_relaxed=mean(mean(error2));
+    errorval_relaxed=mean(mean(error));
     u_relaxed=lambda*u_relaxed+(1-lambda)*u_old2;
 end
 iterations_relaxed
 errorval_relaxed
 figure(2)
 mesh(X,Y,u_relaxed),xlabel('x'),ylabel('y'),zlabel('u'),title('Gauss Seidel with Relaxation')
-clear error_relaxed
+clear error
 %% Gauss Siedel No Forcing Function
 
 % Boundary Conditions
