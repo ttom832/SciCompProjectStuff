@@ -10,16 +10,20 @@ u=zeros(N,N+1);
 [X,Y]=meshgrid(x,y);
 
 % Top B.C.'s
-f=x(2:end).*(x(2:end)+pi).^2;
-u(1,2:end)=f;
+u(1,2:end)=x(2:end).*(x(2:end)+pi).^2
 
 % Bottom B.C.'s
-g=(x(2:end)+pi).^2.*cos(-x(2:end));
-u(N,2:end)=g;
+u(N,2:end)=(x(2:end)+pi).^2.*cos(-x(2:end))
 
 % Right B.C.'s
-h=g(end)+((y+pi)/(2*pi))*(f(end)-g(end))
-u(:,N+1)=h';
+% H_a
+for k=1:N
+    u(k,N+1)=((2*pi)^2*cos(-pi))+...
+        ((y(k)+pi)/(2*pi))*...
+        (pi*(2*pi)^2-...
+        ((2*pi)^2*cos(-pi)));
+end
+u(:,N+1)=
 
 errorval=100;
 iterations=0;
