@@ -1,7 +1,7 @@
 clear
 clc
 Lambda=1.4; % verified with experimentation to be best value
-y=[1,2,5,6,10,15,25]; % geometric multiplier which increases number of nodes in domain
+y=[10]; % geometric multiplier which increases number of nodes in domain
 Nodes=y*10; % Nodes along edge of sqaure domain
 analysisNode1=2;
 analysisNode2=9;
@@ -48,21 +48,21 @@ percent_improvement
 
 
 plot(Nodes,upper_right_position,Nodes,upper_left_position,Nodes,lower_left_position,Nodes,lower_right_position),legend('Position A','Position B','Position C','Position D'),grid,title('Grid Convergence'),xlabel('Nodes along Edge'),ylabel('Value at Position')
+plot(Nodes,Cycles(:,1),Nodes,Cycles(:,2)),grid,legend('Gauss Seidel Cycles','Gauss Seidel Relaxation Cycles','Location','SouthEast'),xlabel('Nodes Along Edge'),ylabel('Cycles'),title('Cylces vs. Domain Density')
+figure(1)
+mesh(X,Y,u_gauss_seidel),xlabel('x'),ylabel('y'),zlabel('u'),title('Gauss Seidel')
 
-% figure(1)
-% mesh(X,Y,u_gauss_seidel),xlabel('x'),ylabel('y'),zlabel('u'),title('Gauss Seidel')
-% 
-% figure(2)
-% mesh(X,Y,u_gauss_seidel_relaxed),xlabel('x'),ylabel('y'),zlabel('u'),title('Gauss Seidel With Relaxation')
-% 
-% figure(3)
-% mesh(X,Y,u_gauss_seidel_no_force),xlabel('x'),ylabel('y'),zlabel('u'),title('Gauss Seidel No Forcing Function')
-% 
-% figure(4)
-% mesh(X,Y,u_gauss_seidel_no_force_relaxed),xlabel('x'),ylabel('y'),zlabel('u'),title('Gauss Seidel No Forcing Function With Relaxation')
-% 
-% figure(5)
-% mesh(X,Y,u_gauss_seidel_relaxed-u_gauss_seidel),xlabel('x'),ylabel('y'),zlabel('u'),title('Difference in Gauss Seidel and Gauss Seidel Relaxed')
+figure(2)
+mesh(X,Y,u_gauss_seidel_relaxed),xlabel('x'),ylabel('y'),zlabel('u'),title('Gauss Seidel With Relaxation')
+
+figure(3)
+mesh(X,Y,u_gauss_seidel_no_force),xlabel('x'),ylabel('y'),zlabel('u'),title('Gauss Seidel No Forcing Function')
+
+figure(4)
+mesh(X,Y,u_gauss_seidel_no_force_relaxed),xlabel('x'),ylabel('y'),zlabel('u'),title('Gauss Seidel No Forcing Function With Relaxation')
+
+figure(5)
+mesh(X,Y,u_gauss_seidel_relaxed-u_gauss_seidel),xlabel('x'),ylabel('y'),zlabel('u'),title('Difference in Gauss Seidel and Gauss Seidel Relaxed')
 
 
 
